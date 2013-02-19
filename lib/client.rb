@@ -82,6 +82,15 @@ class Client
     directories[directories.count - 2]
   end
 
+  def list(mode)
+    if mode.nil?
+      puts "What would you like to list? Perhaps exercises with list exercises, or active projects with list active?"
+      return
+    end
+
+    send("list_#{mode}")
+  end
+
   def list_exercises
     list = get_my_course['exercises'].map {|ex| ex['name']}
     print_exercises(list)
