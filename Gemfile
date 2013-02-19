@@ -1,3 +1,5 @@
+source 'https://rubygems.org'
+gem 'json'
 gem 'faraday'
-
-
+gem 'pry'
+gem 'fileutils'

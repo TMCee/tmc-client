@@ -16,7 +16,7 @@ class Client
 
 
   def get_connection(username, password)
-    @conn = Faraday.new(:url => 'http://tmc.mooc.fi/hy') do |faraday|
+    @conn = Faraday.new(:url => @config.server_url) do |faraday|
       faraday.request  :url_encoded             # form-encode POST params
       faraday.response :logger                  # log requests to STDOUT
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
@@ -24,6 +24,7 @@ class Client
     @conn.basic_auth(username, password) # )
     response = @conn.get 'courses.json', {api_version: 5}
   end
+
   def get_real_name(headers)
     name = headers['content-disposition']
     name.split("\"").compact[-1]
@@ -71,6 +72,16 @@ class Client
     list[0]
   end
 
+  def get_my_exercise_name
+    path = File.basename(Dir.getwd)
+  end
+
+  def get_my_course_name
+    path = Dir.getwd
+    directories = path.split("/")
+    directories[directories.count - 2]
+  end
+
   def list_exercises
     list = get_my_course['exercises'].map {|ex| ex['name']}
     print_exercises(list)
@@ -96,6 +107,29 @@ class Client
     end
   end
 
+  # Call in exercise root
+  def submit_exercise
+    exercise_id = 0
+    # Find course and exercise ids
+    @courses["courses"].each do |course|
+      if course["name"] == get_my_course_name
+        course["exercises"].each do |exercise|
+          if exercise["name"] == get_my_exercise_name
+            exercise_id = exercise["id"]
+          end
+        end
+      end
+    end
+
+    # Zip folder
+    `zip -r zipped.zip .`
+
+    # Submit
+    payload = {:submission => Faraday::UploadIO.new("zipped.zip", "application/zip")}
+    @conn.post "/exercises/#{exercise_id}/submissions", payload
+
+    # Delete zip
+    `rm zipped.zip`
+  end
+
 end
-
-

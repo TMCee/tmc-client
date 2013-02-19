@@ -26,9 +26,17 @@ class MyConfig
     @config[:password]
   end
 
+  def server_url
+    @config[:server_url]
+  end
+
   def password=(pwd)
     @config[:password] = pwd
     save_config
+  end
+
+  def server_url=(url)
+    @config[:server_url] = url
   end
 
   def course_id

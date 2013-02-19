@@ -1,4 +1,5 @@
 config.yml
 lib/config.yml
+Gemfile.lock
 .DS_Store
 .DS_Store?

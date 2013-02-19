@@ -18,8 +18,11 @@ def download_all_available
   @c.download_all_available
 end
 
+def submit_exercise
+  @c.submit_exercise
+end
 
-download_all_available
+submit_exercise
 
 #at startup
 
