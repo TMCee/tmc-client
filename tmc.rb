@@ -22,7 +22,21 @@ def submit_exercise
   @c.submit_exercise
 end
 
-submit_exercise
+def list(mode)
+  if mode.nil?
+    puts "What would you like to list? Perhaps exercises with list exercises, or active projects with list active?"
+    return
+  end
 
-#at startup
+  send("list_#{mode}")
+end
 
+commands = {
+  list: :list,
+  download: :download,
+  submit: :submit_exercise
+}
+
+command = ARGV[0].to_s
+sub_arguments = ARGV.drop 1
+send(command, *sub_arguments)
