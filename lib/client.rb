@@ -72,11 +72,11 @@ class Client
     list[0]
   end
 
-  def get_my_exercise_name
+  def get_current_directory_name
     path = File.basename(Dir.getwd)
   end
 
-  def get_my_course_name
+  def get_previous_directory_name
     path = Dir.getwd
     directories = path.split("/")
     directories[directories.count - 2]
@@ -117,21 +117,33 @@ class Client
   end
 
   # Call in exercise root
-  def submit_exercise
+  def submit_exercise(exercise_directory_name=nil)
+    # Initialize course and exercise names to identify exercise to submit (from json)
+    if exercise_dir_name.nil?
+      exercise_dir_name = get_current_directory_name 
+      course_dir_name = get_previous_directory_name
+      # Zip folder
+      `zip -r zipped.zip .`
+    else
+      course_dir_name = get_current_directory_name
+      # Zip folder
+      `zip -r zipped.zip #{exercise_directory_name}`
+    end
+
+    exercise_dir_name.chomp("/")
     exercise_id = 0
     # Find course and exercise ids
     @courses["courses"].each do |course|
-      if course["name"] == get_my_course_name
+      if course["name"] == course_dir_name
         course["exercises"].each do |exercise|
-          if exercise["name"] == get_my_exercise_name
+          if exercise["name"] == exercise_dir_name
             exercise_id = exercise["id"]
           end
         end
       end
     end
 
-    # Zip folder
-    `zip -r zipped.zip .`
+    
 
     # Submit
     payload = {:submission => Faraday::UploadIO.new("zipped.zip", "application/zip")}
