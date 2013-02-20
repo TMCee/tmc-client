@@ -150,7 +150,7 @@ class Client
     @conn.post "/exercises/#{exercise_id}/submissions", payload
 
     # Delete zip
-    `rm zipped.zip`
+    FileUtils.rm "zipped.zip"
   end
 
 end

@@ -6,7 +6,11 @@ class MyConfig
   end
 
   def get_config
-    YAML::load(File.open('lib/config.yml'))
+    begin
+      YAML::load(File.open(File.join(File.dirname(File.expand_path(__FILE__)), "config.yml")))
+    rescue
+      puts "There is no config.yml file in the lib directory of tmc-client. You can find the template in file config.default.yml"
+    end
   end
 
   def save_config
