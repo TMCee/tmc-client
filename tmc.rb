@@ -5,9 +5,10 @@ require_relative 'lib/client'
 commands = {
   list: :list,
   download: :download,
-  submit: :submit_exercise
+  submit: :submit_exercise,
+  update: :update_exercise
 }
 
 command = ARGV[0].to_s
 sub_arguments = ARGV.drop 1
-@c.send(command, *sub_arguments)
+@c.send(commands[command.to_sym], *sub_arguments)

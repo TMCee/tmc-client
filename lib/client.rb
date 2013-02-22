@@ -4,6 +4,7 @@ require 'faraday'
 require 'yaml'
 require 'pry'
 require 'fileutils'
+require 'pp'
 require_relative 'my_config'
 
 class Client
@@ -14,15 +15,15 @@ class Client
     @courses = JSON.parse response.body
   end
 
-
+  # stupid name - this should create connection, but not fetch courses.json!
   def get_connection(username, password)
     @conn = Faraday.new(:url => @config.server_url) do |faraday|
       faraday.request  :url_encoded             # form-encode POST params
-      faraday.response :logger                  # log requests to STDOUT
+      faraday.response :logger                  # log requests to STDOUT We dont want to do this in production!
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
     end
     @conn.basic_auth(username, password) # )
-    response = @conn.get 'courses.json', {api_version: 5}
+    @conn.get 'courses.json', {api_version: 5}
   end
 
   def get_real_name(headers)
@@ -52,6 +53,10 @@ class Client
     FileUtils.rm file_path
   end
 
+  def fetch_zip(zip_url)
+    @conn.get(zip_url)
+  end
+
   def ask_course_path
     puts "where to download?"
     @config.save_course_path=gets.chomp
@@ -67,7 +72,7 @@ class Client
     end
   end
 
-  def get_my_course
+  def get_my_course(course_name=config.course_id)
     list = @courses['courses'].select {|course| course['id'] == config.course_id}
     list[0]
   end
@@ -82,7 +87,7 @@ class Client
     directories[directories.count - 2]
   end
 
-  def list(mode)
+  def list(mode=nil)
     if mode.nil?
       puts "What would you like to list? Perhaps exercises with list exercises, or active projects with list active?"
       return
@@ -116,8 +121,61 @@ class Client
     end
   end
 
+  def update_exercise(exercise_dir_name=nil)
+    # Initialize course and exercise names to identify exercise to submit (from json)
+    if exercise_dir_name.nil?
+      exercise_dir_name = get_current_directory_name
+      course_dir_name = get_previous_directory_name
+    else
+      course_dir_name = get_current_directory_name
+    end
+
+    exercise_dir_name.chomp("/")
+    exercise_id = 0
+    zip_url=""
+    # Find course and exercise ids
+    @courses["courses"].each do |course|
+      if course["name"] == course_dir_name
+        course["exercises"].each do |exercise|
+          if exercise["name"] == exercise_dir_name
+            exercise_id = exercise["id"]
+            zip_url = exercise["zip_url"]
+          end
+        end
+      end
+    end
+    # and now download the zip file and extract it into a tmpdir.
+    # Then copy all files except in src to this dir
+    binding.pry
+    zip = fetch_zip(zip_url)
+    Dir.mktmpdir do |dir|
+      begin
+        File.open("#{dir}/tmp.zip", 'wb') {|file| file.write(zip.body)} #unless File.exists? file_path
+      rescue Errno::EISDIR
+        binding.pry
+      end
+      result = `unzip -o #{dir}/tmp.zip -d #{dir}/`
+      #now its in #{dir}/#{exercise_dir_name}
+      from_dir = "#{dir}/#{exercise_dir_name}/"
+      to_dir = "#{exercise_dir_name}/"
+      copy_updateable_files(from_dir, to_dir)
+    end
+  end
+
+  def copy_updateable_files(from_dir, to_dir)
+    to_dir = "." if get_current_directory_name == to_dir.chomp("/")
+    do_not_update = %w(src)
+    Dir.glob("#{from_dir}**") do |file|
+      binding.pry
+      filename = file.split("/")[-1]
+      next if do_not_update.include? filename
+      FileUtils.rm_rf("#{to_dir}/file")
+      FileUtils.cp_r(file,"#{to_dir}/")
+    end
+  end
+
   # Call in exercise root
-  def submit_exercise(exercise_directory_name=nil)
+  def submit_exercise(exercise_dir_name=nil)
     # Initialize course and exercise names to identify exercise to submit (from json)
     if exercise_dir_name.nil?
       exercise_dir_name = get_current_directory_name 
@@ -127,7 +185,7 @@ class Client
     else
       course_dir_name = get_current_directory_name
       # Zip folder
-      `zip -r zipped.zip #{exercise_directory_name}`
+      `zip -r zipped.zip #{exercise_dir_name}`
     end
 
     exercise_dir_name.chomp("/")
