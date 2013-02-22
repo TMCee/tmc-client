@@ -116,7 +116,9 @@ class Client
   end
 
   def download_all_available
-    list = get_my_course['exercises'].each do |ex|
+    list = get_my_course['exercises']
+    ask_course_id if list.empty?
+    list.each do |ex|
       download_file(ex['zip_url'])
     end
   end
@@ -144,6 +146,7 @@ class Client
         end
       end
     end
+    raise "UrlNotFound" if zip_url.empty?
     # and now download the zip file and extract it into a tmpdir.
     # Then copy all files except in src to this dir
     zip = fetch_zip(zip_url)

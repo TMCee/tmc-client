@@ -4,7 +4,7 @@ require_relative 'lib/client'
 
 commands = {
   list: :list,
-  download: :download,
+  download: :download_all_available,
   submit: :submit_exercise,
   update: :update_exercise
 }
