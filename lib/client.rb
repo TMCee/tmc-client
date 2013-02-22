@@ -146,7 +146,6 @@ class Client
     end
     # and now download the zip file and extract it into a tmpdir.
     # Then copy all files except in src to this dir
-    binding.pry
     zip = fetch_zip(zip_url)
     Dir.mktmpdir do |dir|
       begin
@@ -166,7 +165,6 @@ class Client
     to_dir = "." if get_current_directory_name == to_dir.chomp("/")
     do_not_update = %w(src)
     Dir.glob("#{from_dir}**") do |file|
-      binding.pry
       filename = file.split("/")[-1]
       next if do_not_update.include? filename
       FileUtils.rm_rf("#{to_dir}/file")
