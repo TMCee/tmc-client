@@ -9,7 +9,7 @@ require_relative 'my_config'
 
 class Client
   attr_accessor :courses, :config, :conn
-  def initialize
+  def initialize()
     @config = MyConfig.new
     response = get_connection(@config.username,@config.password)
     @courses = JSON.parse response.body
@@ -73,11 +73,11 @@ class Client
     list[0]
   end
 
-  def get_current_directory_name
+  def current_directory_name
     path = File.basename(Dir.getwd)
   end
 
-  def get_previous_directory_name
+  def previous_directory_name
     path = Dir.getwd
     directories = path.split("/")
     directories[directories.count - 2]
@@ -117,19 +117,22 @@ class Client
     end
   end
 
+  # Filepath can be either relative or absolute
+  def zip_file_content(filepath)
+    `zip -r -q - #{filepath}`
+  end
+
   # Call in exercise root
   # Zipping to stdout zip -r -q - tmc
-  def submit_exercise(exercise_directory_name=nil)
+  def submit_exercise(exercise_dir_name=nil)
     # Initialize course and exercise names to identify exercise to submit (from json)
     if exercise_dir_name.nil?
-      exercise_dir_name = get_current_directory_name 
-      course_dir_name = get_previous_directory_name
-      # Zip folder
-      zipped = `zip -r -q - .`
+      exercise_dir_name = current_directory_name 
+      course_dir_name = previous_directory_name
+      zipped = zip_file_content(".")
     else
-      course_dir_name = get_current_directory_name
-      # Zip folder
-      zipped = `zip -r -q - #{exercise_directory_name}`)
+      course_dir_name = current_directory_name
+      zipped = zip_file_content(exercise_dir_name)
     end
 
     exercise_dir_name.chomp("/")
@@ -147,7 +150,12 @@ class Client
 
     # Submit
     payload = {:submission => zipped}
-    @conn.post "/exercises/#{exercise_id}/submissions", payload
+    @conn.post do |req|
+      req.url "/exercises/#{exercise_id}/submissions"
+      req.headers["Content-Type"] = "application/zip"
+      req.body = "#{payload}"
+    end
+    payload
   end
 
 end
