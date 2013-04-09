@@ -4,6 +4,7 @@ require 'faraday'
 require 'yaml'
 require 'pry'
 require 'fileutils'
+require 'tempfile'
 require_relative 'my_config'
 
 class Client
@@ -117,17 +118,18 @@ class Client
   end
 
   # Call in exercise root
+  # Zipping to stdout zip -r -q - tmc
   def submit_exercise(exercise_directory_name=nil)
     # Initialize course and exercise names to identify exercise to submit (from json)
     if exercise_dir_name.nil?
       exercise_dir_name = get_current_directory_name 
       course_dir_name = get_previous_directory_name
       # Zip folder
-      `zip -r zipped.zip .`
+      zipped = `zip -r -q - .`
     else
       course_dir_name = get_current_directory_name
       # Zip folder
-      `zip -r zipped.zip #{exercise_directory_name}`
+      zipped = `zip -r -q - #{exercise_directory_name}`)
     end
 
     exercise_dir_name.chomp("/")
@@ -143,14 +145,9 @@ class Client
       end
     end
 
-    
-
     # Submit
-    payload = {:submission => Faraday::UploadIO.new("zipped.zip", "application/zip")}
+    payload = {:submission => zipped}
     @conn.post "/exercises/#{exercise_id}/submissions", payload
-
-    # Delete zip
-    FileUtils.rm "zipped.zip"
   end
 
 end
