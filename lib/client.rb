@@ -1,4 +1,6 @@
 require 'rubygems'
+require 'highline/import'
+
 require 'json'
 require 'faraday'
 require 'yaml'
@@ -12,20 +14,45 @@ class Client
   attr_accessor :courses, :config, :conn
   def initialize()
     @config = MyConfig.new
-    response = get_connection(@config.username,@config.password)
-    @courses = JSON.parse response.body
+    init_connection()
+    if @config.auth
+      @courses = JSON.parse get_courses_json
+    else
+      puts "No username/password. run tmc auth"
+    end
   end
 
   # stupid name - this should create connection, but not fetch courses.json!
-  def get_connection(username, password)
+  def init_connection()
     @conn = Faraday.new(:url => @config.server_url) do |faraday|
       faraday.request  :multipart
       faraday.request  :url_encoded             # form-encode POST params
-      faraday.response :logger                  # log requests to STDOUT We dont want to do this in production!
+      #faraday.response :logger                  # log requests to STDOUT We dont want to do this in production!
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
     end
-    @conn.basic_auth(username, password) # )
-    @conn.get 'courses.json', {api_version: 5}
+
+    if @config.auth
+      @conn.headers[Faraday::Request::Authorization::KEY] = @config.auth
+    else
+      auth
+      @conn.headers[Faraday::Request::Authorization::KEY] = @config.auth
+    end
+    @config.auth = @conn.headers[Faraday::Request::Authorization::KEY]
+  end
+
+  def get_courses_json
+    @conn.get('courses.json', {api_version: 5}).body
+  end
+
+  def get_password(prompt="Enter Password")
+     ask(prompt) {|q| q.echo = false}
+  end
+  def auth
+    print "Username: "
+    username = STDIN.gets.chomp.strip
+    password = get_password("Password (typing is hidden): ")
+    @conn.basic_auth(username, password)
+    @config.auth = @conn.headers[Faraday::Request::Authorization::KEY]
   end
 
   def get_real_name(headers)
@@ -68,7 +95,7 @@ class Client
   end
 
   def current_directory_name
-    path = File.basename(Dir.getwd)
+    File.basename(Dir.getwd)
   end
 
   def previous_directory_name

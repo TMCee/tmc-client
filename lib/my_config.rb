@@ -17,26 +17,8 @@ class MyConfig
     File.open("lib/config.yml", "w") {|f| f.write(config.to_yaml) }
   end
 
-  def username
-    @config[:username]
-  end
-
-  def username=(name)
-    @config[:username] = name
-    save_config
-  end
-
-  def password
-    @config[:password]
-  end
-
   def server_url
     @config[:server_url]
-  end
-
-  def password=(pwd)
-    @config[:password] = pwd
-    save_config
   end
 
   def server_url=(url)
@@ -55,10 +37,18 @@ class MyConfig
     @config[:save_course_path]
   end
 
-
   def save_course_path=(path)
     path= "#{path}/" unless path[-1] == "/"
     @config[:save_course_path]=path
     save_config
+  end
+
+  def auth=(auth)
+    @config[:auth] = auth
+    save_config
+  end
+
+  def auth
+    @config[:auth]
   end
 end
