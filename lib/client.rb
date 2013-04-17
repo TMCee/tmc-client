@@ -47,6 +47,7 @@ class Client
   def get_password(prompt="Enter Password")
      ask(prompt) {|q| q.echo = false}
   end
+
   def auth
     print "Username: "
     username = STDIN.gets.chomp.strip
@@ -130,7 +131,7 @@ class Client
   # Filepath can be either relative or absolute
   def zip_file_content(filepath)
     `zip -r -q tmp_submit.zip #{filepath}`
-    `zip -r -q - #{filepath}`
+    #`zip -r -q - #{filepath}`
   end
 
   # Call in exercise root
@@ -140,10 +141,10 @@ class Client
     if exercise_dir_name.nil?
       exercise_dir_name = current_directory_name
       course_dir_name = previous_directory_name
-      zipped = zip_file_content(".")
+      zip_file_content(".")
     else
       course_dir_name = current_directory_name
-      zipped = zip_file_content(exercise_dir_name)
+      zip_file_content(exercise_dir_name)
     end
 
     exercise_dir_name.chomp("/")
@@ -157,7 +158,6 @@ class Client
     # Submit
     payload={:submission => {}}
     payload[:submission][:file] = Faraday::UploadIO.new('tmp_submit.zip', 'application/zip')
-    #payload = {:submission => {:file => zipped}}
     @conn.post "/exercises/#{exercise['id']}/submissions.json?api_version=5&client=netbeans_plugin&client_version=1", payload
     Fileutils.rm 'tmp_submit.zip'
     payload
@@ -184,10 +184,10 @@ class Client
     raise "Invalid exercise name" if exercise.nil?
     zip = fetch_zip(exercise['zip_url'])
     work_dir = Dir.pwd
-    to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name 
-      work_dir 
+    to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name
+      work_dir
     else
-      File.join(work_dir, exercise_dir_name) 
+      File.join(work_dir, exercise_dir_name)
     end
     Dir.mktmpdir do |tmpdir|
       Dir.chdir tmpdir do
