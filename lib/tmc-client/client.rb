@@ -11,14 +11,15 @@ require 'pp'
 require_relative 'my_config'
 
 class Client
-  attr_accessor :courses, :config, :conn
-  def initialize()
+  attr_accessor :courses, :config, :conn, :output
+  def initialize(output=$stdout)
     @config = MyConfig.new
+    @output = output
     init_connection()
     if @config.auth
       @courses = JSON.parse get_courses_json
     else
-      puts "No username/password. run tmc auth"
+      output.puts "No username/password. run tmc auth"
     end
   end
 
@@ -49,7 +50,7 @@ class Client
   end
 
   def auth
-    print "Username: "
+    output.print "Username: "
     username = STDIN.gets.chomp.strip
     password = get_password("Password (typing is hidden): ")
     @conn.basic_auth(username, password)
@@ -85,13 +86,13 @@ class Client
     course = @courses['courses'].select { |course| course['name'] == course_dir_name }.first
     raise "Invalid course name" if course.nil?
     course["exercises"].each do |ex|
-      puts "#{ex['name']} #{ex['deadline']}" if ex["returnable"]
+      output.puts "#{ex['name']} #{ex['deadline']}" if ex["returnable"]
     end
   end
 
   def list_courses
     @courses['courses'].each do |course|
-      puts "#{course['id']} #{course['name']}"
+      output.puts "#{course['name']}"
     end
   end
 
@@ -196,12 +197,12 @@ class Client
         files = Dir.glob('**/*')
         files.each do |file|
           next if file == exercise_dir_name
-          puts "Want to update #{file}? Yn"
+          output.puts "Want to update #{file}? Yn"
           input = STDIN.gets.chomp.strip.downcase
           if input == "" or input == "y"
             begin
               to = File.join(to_dir,file.split("/")[1..-1].join("/"))
-              puts "copying #{file} to #{to}"
+              output.puts "copying #{file} to #{to}"
               if to.split("/")[-1].include? "."
                 FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
               else
@@ -209,12 +210,12 @@ class Client
               end
               FileUtils.cp_r(file, to)
             rescue ArgumentError => e
-             puts "An error occurred #{e}"
+             output.puts "An error occurred #{e}"
             end
           elsif input == "b"
             binding.pry
           else
-            puts "Skipping file #{file}"
+            output.puts "Skipping file #{file}"
           end
         end
       end

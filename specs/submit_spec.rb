@@ -1,4 +1,4 @@
-require_relative '../lib/client.rb'
+require_relative '../lib/tmc-client/client.rb'
 require 'rspec'
 require 'mocha'
 
