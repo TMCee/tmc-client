@@ -1,4 +1,4 @@
-require_relative 'lib/client'
+require_relative 'tmc-client/client'
 
 @c = Client.new
 
