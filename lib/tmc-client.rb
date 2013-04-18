@@ -4,10 +4,11 @@ require_relative 'tmc-client/client'
 
 commands = {
   list: :list,
-  download: :download_new_exercises,
+  download: :download,
   submit: :submit_exercise,
   update: :update_exercise,
-  auth: :auth
+  auth: :auth,
+  init: :init_course
 }
 
 command = ARGV[0].to_s

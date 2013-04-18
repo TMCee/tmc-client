@@ -15,4 +15,13 @@ describe Client do
     subject.output = output
     subject.list_courses
   end
+
+  it "should print all exercise names when listing exercises of a course" do
+    subject.courses = {"courses" =>  [{ "name" => "test_course1", "exercises" => [{"name" => "test_ex1"}, {"name" => "test_ex2"}]}] }
+    output = mock("output")
+    output.expects(:puts).with("test_ex1")
+    output.expects(:puts).with("test_ex2")
+    subject.output = output
+    subject.list_exercises("test_course1")
+  end
 end

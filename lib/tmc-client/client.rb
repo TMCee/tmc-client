@@ -91,6 +91,7 @@ class Client
   end
 
   def list_courses
+    output.puts "No courses available. Make sure your server url is correct and that you have authenticated." if @courses.nil? or @courses["courses"].nil?
     @courses['courses'].each do |course|
       output.puts "#{course['name']}"
     end
@@ -106,17 +107,45 @@ class Client
     directories[directories.count - 2]
   end
 
-  def download_new_exercises(exercise_dir_name=nil)
-    # Initialize course and exercise names to identify exercise to submit (from json)
-    if exercise_dir_name.nil?
-      exercise_dir_name = current_directory_name
-      course_dir_name = previous_directory_name
-    else
-      course_dir_name = current_directory_name
+  def init_course(course_name)
+    FileUtils.mkdir_p(course_name)
+    output.print "Would you like to download all available exercises? Yn"
+    if STDIN.gets.strip.chomp.downcase == "y"
+      Dir.chdir(course_name) do
+        course = @courses['courses'].select { |course| course['name'] == course_name }.first
+        download_new_exercises
+      end
     end
+  end
 
+  def download(*args)
+    if args.include? "all" or args.include? "-a" or args.include? "--all"
+      download_new_exercises
+    else
+      download_new_exercise(*args)
+    end
+  end
+
+  def filter_returnable(exercises)
+    exercises.collect { |ex| ex['name'] if ex['returnable'] }.compact
+  end
+
+  def download_new_exercises(course_dir_name=nil)
+    course_dir_name = current_directory_name if course_dir_name.nil?
+    course = @courses['courses'].select { |course| course['name'] == course_dir_name }.first
+    raise "Invalid course name" if course.nil?
+    filter_returnable(course['exercises']).each do |ex_name|
+      begin
+        download_new_exercise(ex_name)
+      rescue
+      end
+    end
+  end
+
+  def download_new_exercise(exercise_dir_name=nil)
+    # Initialize course and exercise names to identify exercise to submit (from json)
+    course_dir_name = current_directory_name
     exercise_dir_name.chomp("/")
-    exercise_id = 0
     # Find course and exercise ids
     course = @courses['courses'].select { |course| course['name'] == course_dir_name }.first
     raise "Invalid course name" if course.nil?
@@ -168,7 +197,6 @@ class Client
   #Call in exercise root
   # Zipping to stdout zip -r -q - tmc
   def update_exercise(exercise_dir_name=nil)
-
     # Initialize course and exercise names to identify exercise to submit (from json)
     if exercise_dir_name.nil?
       exercise_dir_name = current_directory_name
