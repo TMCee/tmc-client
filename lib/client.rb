@@ -37,7 +37,7 @@ class Client
       auth
       @conn.headers[Faraday::Request::Authorization::KEY] = @config.auth
     end
-    @config.auth = @conn.headers[Faraday::Request::Authorization::KEY]
+
   end
 
   def get_courses_json
@@ -159,7 +159,7 @@ class Client
     payload={:submission => {}}
     payload[:submission][:file] = Faraday::UploadIO.new('tmp_submit.zip', 'application/zip')
     @conn.post "/exercises/#{exercise['id']}/submissions.json?api_version=5&client=netbeans_plugin&client_version=1", payload
-    Fileutils.rm 'tmp_submit.zip'
+    FileUtils.rm 'tmp_submit.zip'
     payload
   end
 

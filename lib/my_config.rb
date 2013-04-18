@@ -14,7 +14,7 @@ class MyConfig
   end
 
   def save_config
-    File.open("lib/config.yml", "w") {|f| f.write(config.to_yaml) }
+    File.open(File.open(File.join(File.dirname(File.expand_path(__FILE__)), "config.yml")), "w") {|f| f.write(config.to_yaml) }
   end
 
   def server_url
