@@ -14,16 +14,12 @@ describe Client do
     file = Tempfile.new("tmp")
     file.write("content")
     file.close
-    zip_content = subject.zip_file_content(file.path)
+    subject.zip_file_content(file.path)
+    zip_content = File.read("tmp_submit.zip")
+    `rm tmp_submit.zip`
     file.unlink
 
     zip_content.should_not be_nil
-  end
-
-  it "should send data with conn object" do
-    mock_object = mock("conn")
-    mock_object.expects(:post).returns(true)
-    subject.conn = mock_object
-    subject.submit_exercise
+    zip_content.should_not == ""
   end
 end
