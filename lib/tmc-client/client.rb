@@ -17,7 +17,11 @@ class Client
     @output = output
     init_connection()
     if @config.auth
-      @courses = JSON.parse get_courses_json
+      begin
+        @courses = JSON.parse get_courses_json
+      rescue => e
+        auth
+      end
     else
       output.puts "No username/password. run tmc auth"
     end
@@ -41,8 +45,14 @@ class Client
 
   end
 
+  def check
+    puts get_courses_json
+  end
+
   def get_courses_json
-    @conn.get('courses.json', {api_version: 5}).body
+    data = @conn.get('courses.json', {api_version: 5}).body
+    raise "Error with autentikation" if data['error']
+    data
   end
 
   def get_password(prompt="Enter Password")
@@ -53,6 +63,7 @@ class Client
     output.print "Username: "
     username = STDIN.gets.chomp.strip
     password = get_password("Password (typing is hidden): ")
+    @config.auth = nil
     @conn.basic_auth(username, password)
     @config.auth = @conn.headers[Faraday::Request::Authorization::KEY]
   end
