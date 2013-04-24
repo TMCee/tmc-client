@@ -9,7 +9,8 @@ commands = {
   update: :update_exercise,
   auth: :auth,
   check: :check,
-  init: :init_course
+  init: :init_course,
+  status: :status
 }
 
 command = ARGV[0].to_s

@@ -177,13 +177,14 @@ class Client
 
   # Call in exercise root
   # Zipping to stdout zip -r -q - tmc
-  def submit_exercise(exercise_dir_name=nil)
+  def submit_exercise(*args)
     # Initialize course and exercise names to identify exercise to submit (from json)
-    if exercise_dir_name.nil?
+    if args.count == 0
       exercise_dir_name = current_directory_name
       course_dir_name = previous_directory_name
       zip_file_content(".")
     else
+      exercise_dir_name = args.first
       course_dir_name = current_directory_name
       zip_file_content(exercise_dir_name)
     end
@@ -199,9 +200,32 @@ class Client
     # Submit
     payload={:submission => {}}
     payload[:submission][:file] = Faraday::UploadIO.new('tmp_submit.zip', 'application/zip')
-    @conn.post "/exercises/#{exercise['id']}/submissions.json?api_version=5&client=netbeans_plugin&client_version=1", payload
+    response = @conn.post "/exercises/#{exercise['id']}/submissions.json?api_version=5&client=netbeans_plugin&client_version=1", payload
+    submission_url = JSON.parse(response.body)['submission_url']
+    puts "Submission url: #{submission_url}"
+
+    if (args & %w{-q --quiet -s --silent}).empty?
+      while status(submission_url) == "processing"
+        sleep(1)
+      end
+    end
+    
     FileUtils.rm 'tmp_submit.zip'
     payload
+  end
+
+  def status(submission_id_or_url)
+    url = (submission_id_or_url.include? "submissions") ? submission_id_or_url : "http://tmc.jamo.fi/submissions/#{submission_id_or_url}.json?api_version=5"
+    json = JSON.parse(@conn.get(url).body)
+    if json['status'] != 'processing'
+      puts "Status: #{json['status']}"
+      puts "Points: #{json['points'].inspect}"
+      puts "Tests:"
+      json['test_cases'].each do |test|
+        puts "#{test['name']} : #{(test['sucessful']) ? 'success' : 'fail'}#{(test['message'].nil?) ? '' : (' : ' + test['message'])}"
+      end
+    end
+    json['status']
   end
 
   # May require rewrite
