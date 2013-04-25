@@ -121,7 +121,7 @@ class Client
   def init_course(course_name)
     FileUtils.mkdir_p(course_name)
     output.print "Would you like to download all available exercises? Yn"
-    if STDIN.gets.strip.chomp.downcase == "y"
+    if ["", "y", "Y"].include? STDIN.gets.strip.chomp
       Dir.chdir(course_name) do
         course = @courses['courses'].select { |course| course['name'] == course_name }.first
         download_new_exercises
@@ -134,6 +134,63 @@ class Client
       download_new_exercises
     else
       download_new_exercise(*args)
+    end
+  end
+
+  def solution(exercise_dir_name=nil)
+    # Initialize course and exercise names to identify exercise to submit (from json)
+    if exercise_dir_name.nil?
+      exercise_dir_name = current_directory_name
+      course_dir_name = previous_directory_name
+    else
+      course_dir_name = current_directory_name
+    end
+
+    exercise_dir_name.chomp("/")
+    # Find course and exercise ids
+    course = @courses['courses'].select { |course| course['name'] == course_dir_name }.first
+    raise "Invalid course name" if course.nil?
+    exercise = course["exercises"].select { |ex| ex["name"] == exercise_dir_name }.first
+    raise "Invalid exercise name" if exercise.nil?
+    zip = fetch_zip(exercise['solution_zip_url'])
+    puts "URL: #{exercise['solution_zip_url']}"
+    work_dir = Dir.pwd
+    to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name
+      work_dir
+    else
+      File.join(work_dir, exercise_dir_name)
+    end
+    Dir.mktmpdir do |tmpdir|
+      Dir.chdir tmpdir do
+        File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
+        `unzip -n tmp.zip && rm tmp.zip`
+        files = Dir.glob('**/*')
+        all_selected = false
+        files.each do |file|
+          next if file == exercise_dir_name
+          output.puts "Want to update #{file}? YnA" unless all_selected
+          input = STDIN.gets.chomp.strip unless all_selected
+          all_selected = true if input == "A"
+          if all_selected or (["", "y", "Y"].include? input)
+            begin
+              to = File.join(to_dir,file.split("/")[1..-1].join("/"))
+              output.puts "copying #{file} to #{to}"
+              if to.split("/")[-1].include? "."
+                FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
+              else
+                FileUtils.mkdir_p(to)
+              end
+              FileUtils.cp_r(file, to)
+            rescue ArgumentError => e
+             output.puts "An error occurred #{e}"
+            end
+          elsif input == "b"
+            binding.pry
+          else
+            output.puts "Skipping file #{file}"
+          end
+        end
+      end
     end
   end
 
@@ -222,7 +279,7 @@ class Client
       puts "Points: #{json['points'].inspect}"
       puts "Tests:"
       json['test_cases'].each do |test|
-        puts "#{test['name']} : #{(test['sucessful']) ? 'success' : 'fail'}#{(test['message'].nil?) ? '' : (' : ' + test['message'])}"
+        puts "#{test['name']} : #{(test['successful']) ? 'Ok' : 'Fail'}#{(test['message'].nil?) ? '' : (' : ' + test['message'])}"
       end
     end
     json['status']
@@ -258,11 +315,13 @@ class Client
         File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
         `unzip -n tmp.zip && rm tmp.zip`
         files = Dir.glob('**/*')
+        all_selected = false
         files.each do |file|
           next if file == exercise_dir_name
-          output.puts "Want to update #{file}? Yn"
-          input = STDIN.gets.chomp.strip.downcase
-          if input == "" or input == "y"
+          output.puts "Want to update #{file}? YnA" unless all_selected
+          input = STDIN.gets.chomp.strip unless all_selected
+          all_selected = true if input == "A"
+          if all_selected or (["", "y", "Y"].include? input)
             begin
               to = File.join(to_dir,file.split("/")[1..-1].join("/"))
               output.puts "copying #{file} to #{to}"
@@ -284,6 +343,5 @@ class Client
       end
     end
   end
-
 
 end
