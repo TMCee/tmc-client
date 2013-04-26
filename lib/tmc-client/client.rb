@@ -55,6 +55,11 @@ class Client
     data
   end
 
+  # Path can be relative or absolute
+  def is_universal_project?(path)
+    File.exists? File.join(path, ".universal")
+  end
+
   def get_password(prompt="Enter Password")
      ask(prompt) {|q| q.echo = false}
   end
@@ -167,7 +172,7 @@ class Client
         files = Dir.glob('**/*')
         all_selected = false
         files.each do |file|
-          next if file == exercise_dir_name
+          next if file == exercise_dir_name or File.directory? file
           output.puts "Want to update #{file}? YnA" unless all_selected
           input = STDIN.gets.chomp.strip unless all_selected
           all_selected = true if input == "A"
@@ -315,9 +320,29 @@ class Client
         File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
         `unzip -n tmp.zip && rm tmp.zip`
         files = Dir.glob('**/*')
+
+        unless is_universal_project? exercise_dir_name
+          files.each do |file|
+            next if file == exercise_dir_name or file.to_s.include? "src" or File.directory? file
+            begin
+              to = File.join(to_dir,file.split("/")[1..-1].join("/"))
+              output.puts "copying #{file} to #{to}"
+              if to.split("/")[-1].include? "."
+                FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
+              else
+                FileUtils.mkdir_p(to)
+              end
+              FileUtils.cp_r(file, to)
+            rescue ArgumentError => e
+             output.puts "An error occurred #{e}"
+            end
+          end
+          return
+        end
+
         all_selected = false
         files.each do |file|
-          next if file == exercise_dir_name
+          next if file == exercise_dir_name or File.directory? file
           output.puts "Want to update #{file}? YnA" unless all_selected
           input = STDIN.gets.chomp.strip unless all_selected
           all_selected = true if input == "A"
@@ -343,5 +368,4 @@ class Client
       end
     end
   end
-
 end
