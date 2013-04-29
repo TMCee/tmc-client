@@ -46,7 +46,7 @@ class Client
   end
 
   def check
-    puts get_courses_json
+    output.puts get_courses_json
   end
 
   def get_courses_json
@@ -158,7 +158,7 @@ class Client
     exercise = course["exercises"].select { |ex| ex["name"] == exercise_dir_name }.first
     raise "Invalid exercise name" if exercise.nil?
     zip = fetch_zip(exercise['solution_zip_url'])
-    puts "URL: #{exercise['solution_zip_url']}"
+    output.puts "URL: #{exercise['solution_zip_url']}"
     work_dir = Dir.pwd
     to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name
       work_dir
@@ -291,7 +291,7 @@ class Client
   end
 
   # May require rewrite
-  #Call in exercise root
+  # Call in exercise root
   # Zipping to stdout zip -r -q - tmc
   def update_exercise(exercise_dir_name=nil)
     # Initialize course and exercise names to identify exercise to submit (from json)
