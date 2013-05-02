@@ -11,10 +11,11 @@ require 'pp'
 require_relative 'my_config'
 
 class Client
-  attr_accessor :courses, :config, :conn, :output
-  def initialize(output=$stdout)
+  attr_accessor :courses, :config, :conn, :output, :input
+  def initialize(output=$stdout, input=$stdin)
     @config = MyConfig.new
     @output = output
+    @input = input
     init_connection()
     if @config.auth
       begin
@@ -66,7 +67,7 @@ class Client
 
   def auth
     output.print "Username: "
-    username = STDIN.gets.chomp.strip
+    username = @input.gets.chomp.strip
     password = get_password("Password (typing is hidden): ")
     @config.auth = nil
     @conn.basic_auth(username, password)
@@ -126,7 +127,7 @@ class Client
   def init_course(course_name)
     FileUtils.mkdir_p(course_name)
     output.print "Would you like to download all available exercises? Yn"
-    if ["", "y", "Y"].include? STDIN.gets.strip.chomp
+    if ["", "y", "Y"].include? @input.gets.strip.chomp
       Dir.chdir(course_name) do
         course = @courses['courses'].select { |course| course['name'] == course_name }.first
         download_new_exercises
@@ -174,7 +175,7 @@ class Client
         files.each do |file|
           next if file == exercise_dir_name or File.directory? file
           output.puts "Want to update #{file}? YnA" unless all_selected
-          input = STDIN.gets.chomp.strip unless all_selected
+          input = @input.gets.chomp.strip unless all_selected
           all_selected = true if input == "A"
           if all_selected or (["", "y", "Y"].include? input)
             begin
@@ -241,7 +242,7 @@ class Client
   # Zipping to stdout zip -r -q - tmc
   def submit_exercise(*args)
     # Initialize course and exercise names to identify exercise to submit (from json)
-    if args.count == 0
+    if args.count == 0 or args.all? { |arg| arg.start_with? "-" }
       exercise_dir_name = current_directory_name
       course_dir_name = previous_directory_name
       zip_file_content(".")
@@ -261,6 +262,8 @@ class Client
 
     # Submit
     payload={:submission => {}}
+    payload[:request_review] = true if args.include? "--request-review" or args.include? "-r" or args.include? "--review"
+    payload[:paste] = true if args.include? "--paste" or args.include? "-p" or args.include? "--public"
     payload[:submission][:file] = Faraday::UploadIO.new('tmp_submit.zip', 'application/zip')
     response = @conn.post "/exercises/#{exercise['id']}/submissions.json?api_version=5&client=netbeans_plugin&client_version=1", payload
     submission_url = JSON.parse(response.body)['submission_url']
@@ -344,7 +347,7 @@ class Client
         files.each do |file|
           next if file == exercise_dir_name or File.directory? file
           output.puts "Want to update #{file}? YnA" unless all_selected
-          input = STDIN.gets.chomp.strip unless all_selected
+          input = @input.gets.chomp.strip unless all_selected
           all_selected = true if input == "A"
           if all_selected or (["", "y", "Y"].include? input)
             begin

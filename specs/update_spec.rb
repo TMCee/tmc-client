@@ -27,6 +27,9 @@ describe Client do
   it "should download all files when universal project" do
     received_zip_data = mock("faraday_object")
     received_zip_data.expects(:body).returns(File.read(File.join(File.dirname(File.expand_path(__FILE__)), "update_universal_ex.zip")))
+    input = mock("input")
+    input.expects(:gets).returns("A")
+    subject.input = input
     subject.expects(:fetch_zip).returns(received_zip_data)
     current_dir = subject.current_directory_name
     subject.courses = { "courses" => [{ "name" => current_dir, "exercises" => [{ "name" => "update_universal_ex", "returnable" => true }, {"name" => "old", "returnable" => false}] }] }
