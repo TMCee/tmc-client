@@ -16,6 +16,7 @@ class Client
     @config = MyConfig.new
     @output = output
     @input = input
+    @config.server_url ||= request_server_url
     init_connection()
     if @config.auth
       begin
@@ -90,6 +91,11 @@ class Client
     @config.auth = nil
     @conn.basic_auth(username, password)
     @config.auth = @conn.headers[Faraday::Request::Authorization::KEY]
+  end
+
+  def request_server_url
+    output.print "Server url: "
+    @config.server_url = @input.gets.chomp.strip
   end
 
   def get_real_name(headers)
