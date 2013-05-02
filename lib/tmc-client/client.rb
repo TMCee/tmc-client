@@ -353,11 +353,11 @@ class Client
             begin
               to = File.join(to_dir,file.split("/")[1..-1].join("/"))
               output.puts "copying #{file} to #{to}"
-              if to.split("/")[-1].include? "."
-                FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
-              else
-                FileUtils.mkdir_p(to)
-              end
+              # if to.split("/")[-1].include? "."
+              #   FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
+              # else
+              #   FileUtils.mkdir_p(to)
+              # end
               FileUtils.cp_r(file, to)
             rescue ArgumentError => e
              output.puts "An error occurred #{e}"
