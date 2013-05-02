@@ -13,7 +13,7 @@ Commands
 * `tmc submit` or `tmc submit <path-of-the-exercise>` will submit the specified exercise or the current working exercise to the server, and the client will wait for a response from the server. If you do not wish to wait for the response, provide the additional argument `--silent` or `-s` or `--quiet` or `-q`.  
 * `tmc status` or `tmc status <path-of-the-exercise>` will inquire the server about the status of the exercise, and display a short result summary.  
 * `tmc update` or `tmc update <path-of-the-exercise>` will download updates to the specified or working exercise. This will not replace any source files without asking the user first.  
-* `tmc solution` or `tmc solution <path-of-the-exercise>` will download model solutions to the specified or working exercise if they are available. Again, the user will be asked for files before replacement.  
+* `tmc solution` or `tmc solution <path-of-the-exercise>` will download model solutions to the specified or working exercise if they are available. Again, the user will be asked for permission per file before replacement.  
 
 Configuration
 -------------
