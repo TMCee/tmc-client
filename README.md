@@ -20,4 +20,10 @@ Commands
 
 Configuration
 -------------
-TMC-Client requires a configuration file to be filled. It needs the TMC-server url to function. Any other information will be asked from the user, such as credentials. When the user for the first time executes a functionality requiring login, the user will be asked to authenticate. The password or username will not be stored per se, but a basic auth token generated from this information is stored in the configuration file for later use.
+TMC-Client has a configuration file, but it does not need editing. All needed configuration 
+can be done with the tmc commands intorduced above. 
+TMC-Client is written in Ruby: the most awesome programming language. To install the client,
+you need to have Ruby installed. Installing ruby is easiest and most advised through ruby version managers.
+For more details and installation instructions visit for example [RVM](http://www.rvm.io) or [rbenv](http://www.rbenv.org).
+The client itself is a Ruby gem. This means that it is truly easy to install and update. 
+TODO THIS PART
