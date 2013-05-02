@@ -1,7 +1,7 @@
 TMC-Client
 ==========
 
-TMC-Client is a command line interface to operating with the [TMC-server](http://github.com/testmycode/tmc-server). This client can be used to submit, download, and update exercises.
+TMC-Client is a command line interface for operating with the [TMC-server](http://github.com/testmycode/tmc-server). This client can be used to submit, download, and update exercises.
 
 Commands
 --------
