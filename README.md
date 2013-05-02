@@ -15,6 +15,8 @@ Commands
 * `tmc update` or `tmc update <path-of-the-exercise>` will download updates to the specified or working exercise. This will not replace any source files without asking the user first.  
 * `tmc solution` or `tmc solution <path-of-the-exercise>` will download model solutions to the specified or working exercise if they are available. Again, the user will be asked for permission per file before replacement.  
 * `tmc auth` can be used to manually trigger authentication
+* `tmc get url` displays the server url in use
+* `tmc set url <url>` configures a new server url for TMC-Client, which is persisted for later use.
 
 Configuration
 -------------
