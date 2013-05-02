@@ -6,3 +6,4 @@ gem 'fileutils'
 gem 'mocha'
 gem 'highline' # brew install imagemagick
 gem 'rake'
+gem 'rspec'
