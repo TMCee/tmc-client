@@ -11,7 +11,9 @@ commands = {
   check: :check,
   init: :init_course,
   status: :status,
-  solution: :solution
+  solution: :solution,
+  get: :get,
+  set: :set
 }
 
 command = ARGV[0].to_s

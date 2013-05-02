@@ -46,6 +46,24 @@ class Client
 
   end
 
+  def get(*args)
+    target = args.first
+    case target
+      when 'url' then output.puts @config.server_url
+      else output.puts "No property selected"
+    end
+  end
+
+  def set(*args)
+    target = args.first
+    case target
+      when "url"
+        @config.server_url = args[1] if args.count >= 2
+        @config.save_config
+      else output.puts "No property selected"
+    end
+  end
+
   def check
     output.puts get_courses_json
   end
