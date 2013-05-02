@@ -91,9 +91,9 @@ class Client
     mode = mode.to_sym
     case mode
       when :courses
-         list_courses
+        list_courses
       when :exercises
-          list_exercises
+        list_exercises
       else
     end
   end
@@ -280,7 +280,7 @@ class Client
   end
 
   def status(submission_id_or_url)
-    url = (submission_id_or_url.include? "submissions") ? submission_id_or_url : "http://tmc.jamo.fi/submissions/#{submission_id_or_url}.json?api_version=5"
+    url = (submission_id_or_url.include? "submissions") ? submission_id_or_url : "/submissions/#{submission_id_or_url}.json?api_version=5"
     json = JSON.parse(@conn.get(url).body)
     if json['status'] != 'processing'
       puts "Status: #{json['status']}"
