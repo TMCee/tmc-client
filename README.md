@@ -5,7 +5,7 @@ TMC-Client is a command line interface to operating with the TMC-server. This cl
 
 Commands
 --------
-* `tmc list courses` or shortly `tmc list` lists all available courses for configured TMC-server  
+*  `tmc list`, short for `tmc list courses`, lists all available courses for configured TMC-server  
 * `tmc init <coursename>` will initialize a folder for your course to your working directory  
 * `tmc list exercises` lists all available exercises for the current working course (working dir)  
 * `tmc download <exercisename>` will download all files of the specified exercise to the current course directory  
