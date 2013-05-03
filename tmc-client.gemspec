@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
-	s.name = 'tmc-client'
-	s.version = '0.0.2'
-  s.platform    = Gem::Platform::RUBY
-	s.summary = 'TestMyCode Commandline client'
-	s.authors = ['Jarmo Isotalo', 'Tony Kovanen']
-	s.homepage = "https://github.com/TMCee/tmc-client/"
+	s.name          = 'tmc-client'
+	s.version       = '0.0.3'
+  s.platform      = Gem::Platform::RUBY
+	s.summary       = 'TestMyCode Commandline client'
+	s.authors       = ['Jarmo Isotalo', 'Tony Kovanen']
+	s.homepage      = "https://github.com/TMCee/tmc-client/"
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
