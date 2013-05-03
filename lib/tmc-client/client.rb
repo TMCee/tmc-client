@@ -16,21 +16,7 @@ class Client
     @config = MyConfig.new
     @output = output
     @input = input
-    begin
-      @config.server_url ||= request_server_url
-    rescue
-      request_server_url
-    end
-    init_connection()
-    if @config.auth
-      begin
-        @courses = JSON.parse get_courses_json
-      rescue => e
-        auth
-      end
-    else
-      output.puts "No username/password. run tmc auth"
-    end
+    setup_client
   end
 
   # stupid name - this should create connection, but not fetch courses.json!
@@ -381,6 +367,25 @@ class Client
       update_from_zip(exercise['zip_url'], exercise_dir_name, course_dir_name, exercise, course)
     else
       update_automatically_detected_project_from_zip(exercise['zip_url'], exercise_dir_name, course_dir_name, exercise, course)
+    end
+  end
+
+  protected
+  def setup_client
+    begin
+      @config.server_url ||= request_server_url
+    rescue
+      request_server_url
+    end
+    init_connection()
+    if @config.auth
+      begin
+        @courses = JSON.parse get_courses_json
+      rescue => e
+        auth
+      end
+    else
+      output.puts "No username/password. run tmc auth"
     end
   end
 end

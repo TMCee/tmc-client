@@ -2,6 +2,11 @@ require_relative '../lib/tmc-client/client.rb'
 require 'rspec'
 require 'mocha'
 
+Client.class_eval do
+  def setup_client
+  end
+end
+
 describe Client do
   subject do
     Client.new
