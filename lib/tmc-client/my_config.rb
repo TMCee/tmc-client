@@ -7,10 +7,11 @@ class MyConfig
 
   def get_config
     begin
-      YAML::load(File.open(File.join(File.dirname(File.expand_path(__FILE__)), "config.yml")))
+      yaml = YAML::load(File.open(File.join(File.dirname(File.expand_path(__FILE__)), "config.yml")))
     rescue
-      puts "There is no config.yml file in the lib directory of tmc-client. You can find the template in file config.default.yml"
+      raise "Error loading config.yml"
     end
+    if yaml then yaml else {} end
   end
 
   def save_config
@@ -18,7 +19,7 @@ class MyConfig
   end
 
   def server_url
-    @config[:server_url]
+    @config[:server_url] unless @config.nil?
   end
 
   def server_url=(url)
@@ -50,6 +51,6 @@ class MyConfig
   end
 
   def auth
-    @config[:auth]
+    @config[:auth] unless @config.nil?
   end
 end

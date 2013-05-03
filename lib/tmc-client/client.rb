@@ -16,7 +16,11 @@ class Client
     @config = MyConfig.new
     @output = output
     @input = input
-    @config.server_url ||= request_server_url
+    begin
+      @config.server_url ||= request_server_url
+    rescue
+      request_server_url
+    end
     init_connection()
     if @config.auth
       begin

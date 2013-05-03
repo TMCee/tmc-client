@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
 	s.name          = 'tmc-client'
-	s.version       = '0.0.5'
+	s.version       = '0.0.1'
   s.platform      = Gem::Platform::RUBY
 	s.summary       = 'TestMyCode Commandline client'
 	s.authors       = ['Jarmo Isotalo', 'Tony Kovanen']
@@ -9,9 +9,6 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
-
-  s.add_dependency "hashr", "~> 0.0.22"
-  s.add_dependency "safe_yaml", '~> 0.9.0'
 
   s.add_dependency "json"
   s.add_dependency "faraday"
