@@ -3,6 +3,11 @@ TMC-Client
 
 TMC-Client is a command line interface for operating with the [TMC-server](http://github.com/testmycode/tmc-server). This client can be used to submit, download, and update exercises.
 
+Installation
+------------
+You may install tmc-client using rubygems `gem install tmc-client`
+
+
 Commands
 --------
 *  `tmc list`, short for `tmc list courses`, lists all available courses for the configured TMC-server  
@@ -20,4 +25,4 @@ Commands
 
 Configuration
 -------------
-TMC-Client requires a configuration file to be filled. It needs the TMC-server url to function. Any other information will be asked from the user, such as credentials. When the user for the first time executes a functionality requiring login, the user will be asked to authenticate. The password or username will not be stored per se, but a basic auth token generated from this information is stored in the configuration file for later use.
+All configuration is done via commandline interface. If no server url is given it's asked on startup.
