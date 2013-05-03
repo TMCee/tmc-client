@@ -7,6 +7,10 @@ describe Client do
     c = Client.new
   end
 
+  before(:each) do
+    subject.config = MyConfig.new
+  end
+  
   after(:each) do
     `rm -r update_universal_ex`
     `rm -r update_ex`
