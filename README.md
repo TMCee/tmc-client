@@ -21,7 +21,7 @@ Commands
 Configuration
 -------------
 TMC-Client has a configuration file, but it does not need editing. All needed configuration 
-can be done with the tmc commands intorduced above. 
+can be done with the tmc commands introduced above. 
 TMC-Client is written in Ruby: the most awesome programming language. To install the client,
 you need to have Ruby installed. Installing ruby is easiest and most advised through ruby version managers.
 For more details and installation instructions visit for example [RVM](http://www.rvm.io) or [rbenv](http://www.rbenv.org).
