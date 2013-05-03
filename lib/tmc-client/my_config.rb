@@ -23,6 +23,7 @@ class MyConfig
 
   def server_url=(url)
     @config[:server_url] = url
+    save_config
   end
 
   def course_id

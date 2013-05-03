@@ -25,6 +25,8 @@ describe Client do
   end
 
   it "should download all files when universal project" do
+    FileUtils.mkdir_p(File.join("update_universal_ex", ".universal"))
+
     received_zip_data = mock("faraday_object")
     received_zip_data.expects(:body).returns(File.read(File.join(File.dirname(File.expand_path(__FILE__)), "update_universal_ex.zip")))
     input = mock("input")

@@ -60,7 +60,6 @@ class Client
     case target
       when "url"
         @config.server_url = args[1] if args.count >= 2
-        @config.save_config
       else output.puts "No property selected"
     end
   end
@@ -182,8 +181,13 @@ class Client
     raise "Invalid course name" if course.nil?
     exercise = course["exercises"].select { |ex| ex["name"] == exercise_dir_name }.first
     raise "Invalid exercise name" if exercise.nil?
-    zip = fetch_zip(exercise['solution_zip_url'])
-    output.puts "URL: #{exercise['solution_zip_url']}"
+    
+    update_from_zip(exercise['solution_zip_url'], exercise_dir_name, course_dir_name, exercise, course)
+  end
+
+  def update_from_zip(zip_url, exercise_dir_name, course_dir_name, exercise, course)
+    zip = fetch_zip(zip_url)
+    output.puts "URL: #{zip_url}"
     work_dir = Dir.pwd
     to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name
       work_dir
@@ -198,14 +202,14 @@ class Client
         all_selected = false
         files.each do |file|
           next if file == exercise_dir_name or File.directory? file
-          output.puts "Want to update #{file}? YnA" unless all_selected
+          output.puts "Want to update #{file}? Yn[A]" unless all_selected
           input = @input.gets.chomp.strip unless all_selected
-          all_selected = true if input == "A"
+          all_selected = true if input == "A" or input == "a"
           if all_selected or (["", "y", "Y"].include? input)
             begin
               to = File.join(to_dir,file.split("/")[1..-1].join("/"))
               output.puts "copying #{file} to #{to}"
-              if to.split("/")[-1].include? "."
+              unless File.directory? to
                 FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
               else
                 FileUtils.mkdir_p(to)
@@ -218,6 +222,39 @@ class Client
             binding.pry
           else
             output.puts "Skipping file #{file}"
+          end
+        end
+      end
+    end
+  end
+
+  def update_automatically_detected_project_from_zip(zip_url, exercise_dir_name, course_dir_name, exercise, course)
+    zip = fetch_zip(exercise['zip_url'])
+    work_dir = Dir.pwd
+    to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name
+      work_dir
+    else
+      File.join(work_dir, exercise_dir_name)
+    end
+    Dir.mktmpdir do |tmpdir|
+      Dir.chdir tmpdir do
+        File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
+        `unzip -n tmp.zip && rm tmp.zip`
+        files = Dir.glob('**/*')
+
+        files.each do |file|
+          next if file == exercise_dir_name or file.to_s.include? "src" or File.directory? file
+          begin
+            to = File.join(to_dir,file.split("/")[1..-1].join("/"))
+            output.puts "copying #{file} to #{to}"
+            unless File.directory? to
+              FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
+            else
+              FileUtils.mkdir_p(to)
+            end
+            FileUtils.cp_r(file, to)
+          rescue ArgumentError => e
+           output.puts "An error occurred #{e}"
           end
         end
       end
@@ -317,16 +354,16 @@ class Client
     json['status']
   end
 
-  # May require rewrite
-  # Call in exercise root
-  # Zipping to stdout zip -r -q - tmc
   def update_exercise(exercise_dir_name=nil)
     # Initialize course and exercise names to identify exercise to submit (from json)
+    is_universal = false
     if exercise_dir_name.nil?
       exercise_dir_name = current_directory_name
       course_dir_name = previous_directory_name
+      is_universal = true if File.exists? ".universal"
     else
       course_dir_name = current_directory_name
+      is_universal = true if File.exists?(File.join("#{exercise_dir_name}", ".universal"))
     end
 
     exercise_dir_name.chomp("/")
@@ -335,64 +372,11 @@ class Client
     raise "Invalid course name" if course.nil?
     exercise = course["exercises"].select { |ex| ex["name"] == exercise_dir_name }.first
     raise "Invalid exercise name" if exercise.nil?
-    zip = fetch_zip(exercise['zip_url'])
-    work_dir = Dir.pwd
-    to_dir = if Dir.pwd.chomp("/").split("/").last == exercise_dir_name
-      work_dir
+
+    if is_universal
+      update_from_zip(exercise['zip_url'], exercise_dir_name, course_dir_name, exercise, course)
     else
-      File.join(work_dir, exercise_dir_name)
-    end
-    Dir.mktmpdir do |tmpdir|
-      Dir.chdir tmpdir do
-        File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
-        `unzip -n tmp.zip && rm tmp.zip`
-        files = Dir.glob('**/*')
-
-        unless is_universal_project? exercise_dir_name
-          files.each do |file|
-            next if file == exercise_dir_name or file.to_s.include? "src" or File.directory? file
-            begin
-              to = File.join(to_dir,file.split("/")[1..-1].join("/"))
-              output.puts "copying #{file} to #{to}"
-              if to.split("/")[-1].include? "."
-                FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
-              else
-                FileUtils.mkdir_p(to)
-              end
-              FileUtils.cp_r(file, to)
-            rescue ArgumentError => e
-             output.puts "An error occurred #{e}"
-            end
-          end
-          return
-        end
-
-        all_selected = false
-        files.each do |file|
-          next if file == exercise_dir_name or File.directory? file
-          output.puts "Want to update #{file}? YnA" unless all_selected
-          input = @input.gets.chomp.strip unless all_selected
-          all_selected = true if input == "A"
-          if all_selected or (["", "y", "Y"].include? input)
-            begin
-              to = File.join(to_dir,file.split("/")[1..-1].join("/"))
-              output.puts "copying #{file} to #{to}"
-              # if to.split("/")[-1].include? "."
-              #   FileUtils.mkdir_p(to.split("/")[0..-2].join("/"))
-              # else
-              #   FileUtils.mkdir_p(to)
-              # end
-              FileUtils.cp_r(file, to)
-            rescue ArgumentError => e
-             output.puts "An error occurred #{e}"
-            end
-          elsif input == "b"
-            binding.pry
-          else
-            output.puts "Skipping file #{file}"
-          end
-        end
-      end
+      update_automatically_detected_project_from_zip(exercise['zip_url'], exercise_dir_name, course_dir_name, exercise, course)
     end
   end
 end

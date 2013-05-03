@@ -19,4 +19,12 @@ commands = {
 command = ARGV[0].to_s
 sub_arguments = ARGV.drop 1
 
-@c.send(commands[command.to_sym], *sub_arguments) #unless command
+begin
+  unless commands[command.to_sym].nil?
+    @c.send(commands[command.to_sym], *sub_arguments) #unless command
+  else
+    puts "Unknown command"
+  end
+rescue
+  puts "An error occurred. Make sure the command was triggered in the right directory. Also make sure you have a valid server address and authentication information. If these do not help, please contact an administrator."
+end
