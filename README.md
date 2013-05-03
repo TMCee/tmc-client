@@ -3,6 +3,7 @@ TMC-Client
 
 [![Build Status](https://travis-ci.org/TMCee/tmc-client.png)](https://travis-ci.org/TMCee/tmc-client)
 [![Code Climate](https://codeclimate.com/github/TMCee/tmc-client.png)](https://codeclimate.com/github/TMCee/tmc-client)
+
 TMC-Client is a command line interface for operating with the [TMC-server](http://github.com/testmycode/tmc-server). This client can be used to submit, download, and update exercises.
 
 Installation
