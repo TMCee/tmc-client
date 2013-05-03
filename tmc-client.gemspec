@@ -12,7 +12,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency "json"
   s.add_dependency "faraday"
-  s.add_dependency "pry"
   s.add_dependency "fileutils"
   s.add_dependency "mocha"
   s.add_dependency "highline"
