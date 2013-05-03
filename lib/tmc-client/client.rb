@@ -4,7 +4,6 @@ require 'highline/import'
 require 'json'
 require 'faraday'
 require 'yaml'
-require 'pry'
 require 'fileutils'
 require 'tempfile'
 require 'pp'
@@ -208,8 +207,6 @@ class Client
             rescue ArgumentError => e
              output.puts "An error occurred #{e}"
             end
-          elsif input == "b"
-            binding.pry
           else
             output.puts "Skipping file #{file}"
           end
