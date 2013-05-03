@@ -7,6 +7,10 @@ describe Client do
     c = Client.new
   end
 
+  before(:each) do
+    subject.config = MyConfig.new
+  end
+
   it "should be able to download a zip" do
     received_zip_data = mock("faraday_object")
     received_zip_data.expects(:body).returns(File.read(File.join(File.dirname(File.expand_path(__FILE__)), "ex.zip")))

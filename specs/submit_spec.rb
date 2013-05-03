@@ -7,6 +7,10 @@ describe Client do
     Client.new
   end
 
+  before(:each) do
+    subject.config = MyConfig.new
+  end
+
   its(:current_directory_name) { should ==  `pwd`.split("/").last.chomp }
   its(:previous_directory_name) { should == `pwd`.split("/")[-2].chomp }
 

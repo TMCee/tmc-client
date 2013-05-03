@@ -7,6 +7,10 @@ describe Client do
     Client.new
   end
 
+  before(:each) do
+    subject.config = MyConfig.new
+  end
+  
   it "should print all course names when listing courses" do
     subject.courses = {"courses" =>  [{ "name" => "test_course1"}, {"name" => "test_course2" }] }
     output = mock("output")
