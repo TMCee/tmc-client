@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency "mocha"
   s.add_dependency "highline"
   s.add_dependency "rake"
-  s.add_dependency "rspec"
+
 
   s.add_development_dependency "rspec", "~> 2.8"
 
