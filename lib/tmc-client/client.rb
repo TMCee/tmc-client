@@ -1,12 +1,13 @@
 require 'rubygems'
 require 'highline/import'
-
+require 'pry'
 require 'json'
 require 'faraday'
 require 'yaml'
 require 'fileutils'
 require 'tempfile'
 require 'pp'
+require 'zip/zip'
 require_relative 'my_config'
 
 class Client
@@ -141,7 +142,6 @@ class Client
     output.print "Would you like to download all available exercises? Yn"
     if ["", "y", "Y"].include? @input.gets.strip.chomp
       Dir.chdir(course_name) do
-        course = @courses['courses'].select { |course| course['name'] == course_name }.first
         download_new_exercises
       end
     end
@@ -186,7 +186,10 @@ class Client
     Dir.mktmpdir do |tmpdir|
       Dir.chdir tmpdir do
         File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
-        `unzip -n tmp.zip && rm tmp.zip`
+        #`unzip -n tmp.zip && rm tmp.zip`
+        full_path = File.join(Dir.pwd, 'tmp.zip')
+        unzip_file(full_path, Dir.pwd, exercise_dir_name)
+        `rm tmp.zip`
         files = Dir.glob('**/*')
         all_selected = false
         files.each do |file|
@@ -226,7 +229,10 @@ class Client
     Dir.mktmpdir do |tmpdir|
       Dir.chdir tmpdir do
         File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
-        `unzip -n tmp.zip && rm tmp.zip`
+        # `unzip -n tmp.zip && rm tmp.zip`
+        full_path = File.join(Dir.pwd, 'tmp.zip')
+        unzip_file(full_path, Dir.pwd, exercise_dir_name)
+        `rm tmp.zip`
         files = Dir.glob('**/*')
 
         files.each do |file|
@@ -277,7 +283,21 @@ class Client
     raise "Exercise already downloaded" if File.exists? exercise['name']
     zip = fetch_zip(exercise['zip_url'])
     File.open("tmp.zip", 'wb') {|file| file.write(zip.body)}
-    `unzip -n tmp.zip && rm tmp.zip`
+    full_path = File.join(Dir.pwd, 'tmp.zip')
+    unzip_file(full_path, Dir.pwd, exercise_dir_name)
+    #`unzip -n tmp.zip && rm tmp.zip`
+    `rm tmp.zip`
+  end
+
+  def unzip_file (file, destination, exercise_dir_name)
+    Zip::ZipFile.open(file) do |zip_file|
+      zip_file.each do |f|
+        merged_path = f.name.sub(exercise_dir_name.gsub("-", "/"), "")
+        f_path=File.join(destination, exercise_dir_name, merged_path)
+        FileUtils.mkdir_p(File.dirname(f_path))
+        zip_file.extract(f, f_path) unless File.exist?(f_path)
+      end
+    end
   end
 
   # Filepath can be either relative or absolute
