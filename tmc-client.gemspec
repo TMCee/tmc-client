@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'tmc-client'
-  s.version       = '0.0.2'
+  s.version       = '0.0.3'
   s.platform      = Gem::Platform::RUBY
   s.summary       = 'TestMyCode Commandline client'
   s.authors       = ['Jarmo Isotalo', 'Tony Kovanen']
