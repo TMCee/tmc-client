@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'highline/import'
-require 'pry'
 require 'json'
 require 'faraday'
 require 'yaml'
@@ -333,7 +332,14 @@ class Client
     payload[:request_review] = true if args.include? "--request-review" or args.include? "-r" or args.include? "--review"
     payload[:paste] = true if args.include? "--paste" or args.include? "-p" or args.include? "--public"
     payload[:submission][:file] = Faraday::UploadIO.new('tmp_submit.zip', 'application/zip')
-    response = @conn.post "/exercises/#{exercise['id']}/submissions.json?api_version=5&client=netbeans_plugin&client_version=1", payload
+    tmp_conn = Faraday.new(:url => exercise['return_url']) do |faraday|
+      faraday.request  :multipart
+      faraday.request  :url_encoded             # form-encode POST params
+      faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+    end
+    tmp_conn.headers[Faraday::Request::Authorization::KEY] = @config.auth
+
+    response = tmp_conn.post "?api_version=5&client=netbeans_plugin&client_version=1", payload
     submission_url = JSON.parse(response.body)['submission_url']
     puts "Submission url: #{submission_url}"
 
