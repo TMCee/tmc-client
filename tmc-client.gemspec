@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = 'tmc-client'
-  s.version       = '0.0.1'
+  s.version       = '0.0.2'
   s.platform      = Gem::Platform::RUBY
   s.summary       = 'TestMyCode Commandline client'
   s.authors       = ['Jarmo Isotalo', 'Tony Kovanen']
@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_dependency "mocha"
   s.add_dependency "highline"
   s.add_dependency "rake"
+  s.add_dependency "rubyzip"
 
   s.add_development_dependency "rspec"
 
