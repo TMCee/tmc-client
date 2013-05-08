@@ -4,6 +4,18 @@ rvm:
   - 1.9.3
   - 2.0.0
 script: bundle exec rspec specs
-notifications:
-  irc: "irc.jippii.fi#tmcee"
+  
+  
+notifications: 
   email: false
+  irc: 
+    channels:
+    - ircnet.eversible.com#tmcee
+    use_notice: true
+    skip_join: true
+    template:
+    - "----"
+    - "%{message}"
+    - "%{repository}/%{branch}#%{build_number} (%{author})"
+    - "Build details : %{build_url}"
+    - "----"
