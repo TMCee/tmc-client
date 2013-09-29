@@ -1,9 +1,8 @@
 #!/usr/bin/env ruby
-
 begin
   require 'tmc-client/client'
 
-  @c = Client.new
+  @c = TmcClient::Client.new
 
   commands = {
     list: :list,

@@ -1,28 +1,26 @@
-require_relative '../lib/tmc-client/client.rb'
-require 'rspec'
-require 'mocha/setup'
+require 'spec_helper'
 
-Client.class_eval do
+TmcClient::Client.class_eval do
   def setup_client
   end
 end
 
-describe Client do
+describe TmcClient::Client do
   subject do
-    c = Client.new
+    c = TmcClient::Client.new
   end
 
   before(:each) do
-    subject.config = MyConfig.new
+    subject.config = TmcClient::MyConfig.new
   end
   
   after(:each) do
-    `rm -r update_universal_ex`
-    `rm -r update_ex`
+    `rm -r update_universal_ex 2>&1 /dev/null`
+    `rm -r update_ex 2>&1 /dev/null`
   end
 
   it "should download all but contents of src folder with normal projects" do
-    received_zip_data = mock("faraday_object")
+    received_zip_data = double("faraday_object")
     received_zip_data.expects(:body).returns(File.read(File.join(File.dirname(File.expand_path(__FILE__)), "update_ex.zip")))
     subject.expects(:fetch_zip).returns(received_zip_data)
     current_dir = subject.current_directory_name
@@ -36,9 +34,9 @@ describe Client do
   it "should download all files when universal project" do
     FileUtils.mkdir_p(File.join("update_universal_ex", ".universal"))
 
-    received_zip_data = mock("faraday_object")
+    received_zip_data = double("faraday_object")
     received_zip_data.expects(:body).returns(File.read(File.join(File.dirname(File.expand_path(__FILE__)), "update_universal_ex.zip")))
-    input = mock("input")
+    input = double("input")
     input.expects(:gets).returns("A")
     subject.input = input
     subject.expects(:fetch_zip).returns(received_zip_data)

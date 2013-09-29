@@ -1,19 +1,18 @@
-require_relative '../lib/tmc-client/client.rb'
-require 'rspec'
-require 'mocha'
+require 'spec_helper'
 
-Client.class_eval do
+
+TmcClient::Client.class_eval do
   def setup_client
   end
 end
 
-describe Client do
+describe TmcClient::Client do
   subject do
-    Client.new
+    TmcClient::Client.new
   end
 
   before(:each) do
-    subject.config = MyConfig.new
+    subject.config = TmcClient::MyConfig.new
   end
 
   its(:current_directory_name) { should ==  `pwd`.split("/").last.chomp }
@@ -25,7 +24,7 @@ describe Client do
     file.close
     subject.zip_file_content(file.path)
     zip_content = File.read("tmp_submit.zip")
-    `rm tmp_submit.zip`
+    `rm tmp_submit.zip 2>&1 /dev/null`
     file.unlink
 
     zip_content.should_not be_nil
